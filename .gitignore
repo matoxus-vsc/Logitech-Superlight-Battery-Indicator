@@ -1,0 +1,13 @@
+build/
+build-*/
+out/
+.vs/
+*.exe
+*.pdb
+*.obj
+*.ilk
+*.user
+*.suo
+config.json
+config.json.tmp
+config.json.bak

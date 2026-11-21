@@ -1,0 +1,12 @@
+{
+  "poll_interval_sec": 60,
+  "low_battery_threshold": 15,
+  "window_x": -1,
+  "window_y": -1,
+  "always_on_top": false,
+  "multi_device_mode": false,
+  "mock_mode": false,
+  "dock_to_taskbar": true,
+  "taskbar_offset_x": 0,
+  "low_battery_notify": true
+}
