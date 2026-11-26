@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "hid_device.hpp"
+#include "steelseries_device.hpp"
 #include "widget_window.hpp"
 
 #include <windows.h>
@@ -98,6 +99,7 @@ int WINAPI wWinMain(
     if (cli.probe) {
         std::wostringstream oss;
         slb::runHardwareProbe(oss);
+        slb::runSteelSeriesHardwareProbe(oss);
         writeProbeText(oss.str());
         return 0;
     }

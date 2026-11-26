@@ -3,6 +3,7 @@
 #include "app_state.hpp"
 #include "config.hpp"
 #include "hid_device.hpp"
+#include "steelseries_device.hpp"
 
 #include <windows.h>
 
@@ -53,6 +54,7 @@ private:
 
     std::thread worker_;
     SuperlightHidClient hidClient_;
+    SteelSeriesHidClient steelSeriesClient_;
 };
 
 }  // namespace slb

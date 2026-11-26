@@ -141,6 +141,32 @@ void BatteryPoller::workerLoop() {
             nextSnap = buildMockSnapshot(phase, localCfg.multiDeviceMode);
         } else {
             nextSnap = hidClient_.poll(localCfg.multiDeviceMode, topologyChanged);
+            const auto& logi = nextSnap.primaryMouse;
+            const bool logiActiveCharging = logi.present && !logi.sleeping && logi.charging;
+            if (!logiActiveCharging) {
+                const DeviceBatteryState ss = steelSeriesClient_.poll(topologyChanged);
+                auto rank = [](const DeviceBatteryState& s) -> int {
+                    if (!s.present) {
+                        return 0;
+                    }
+                    if (!s.sleeping && s.charging) {
+                        return 5;
+                    }
+                    if (!s.sleeping && s.percentage >= 0) {
+                        return 4;
+                    }
+                    if (s.sleeping && s.percentage >= 0) {
+                        return 3;
+                    }
+                    if (!s.sleeping) {
+                        return 2;
+                    }
+                    return 1;
+                };
+                if (rank(ss) > rank(logi)) {
+                    nextSnap.primaryMouse = ss;
+                }
+            }
         }
         topologyChanged = false;
 

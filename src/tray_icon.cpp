@@ -49,7 +49,7 @@ TrayIcon::IconTone TrayIcon::toneForSnapshot(
 std::wstring TrayIcon::formatTooltip(const AppSnapshot& snapshot) const {
     const bool pl = isPolishUi();
     const auto& m = snapshot.primaryMouse;
-    std::wstring name = m.deviceName.empty() ? L"Logitech Superlight" : m.deviceName;
+    std::wstring name = m.deviceName.empty() ? L"Wireless Mouse" : m.deviceName;
     if (!m.present) {
         return name + (pl ? L": brak połączenia" : L": disconnected");
     }
@@ -278,7 +278,7 @@ void TrayIcon::showLowBatteryNotification(const DeviceBatteryState& mouse) {
         return;
     }
     const bool pl = isPolishUi();
-    const std::wstring name = mouse.deviceName.empty() ? L"Logitech Superlight" : mouse.deviceName;
+    const std::wstring name = mouse.deviceName.empty() ? L"Wireless Mouse" : mouse.deviceName;
     const std::wstring title = pl ? L"Niski poziom baterii myszki" : L"Low mouse battery";
     const std::wstring body = name + L": " + std::to_wstring(mouse.percentage) + L"%";
 

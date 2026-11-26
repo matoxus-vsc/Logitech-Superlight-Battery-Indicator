@@ -1,5 +1,6 @@
 #include "../src/config.hpp"
 #include "../src/hidpp_protocol.hpp"
+#include "../src/steelseries_protocol.hpp"
 #include "../src/taskbar_dock.hpp"
 
 #include <array>
@@ -291,6 +292,86 @@ void testTaskbarDockGeometry() {
     CHECK(pFallback.x == baseX);
 }
 
+void testSteelSeriesProfilesAndFiltering() {
+    auto r650w = slb::findSteelSeriesWirelessProfile(0x1726);
+    CHECK(r650w.has_value());
+    CHECK(r650w->endpoint == 0);
+    CHECK(!r650w->isWired);
+    CHECK(r650w->kind == slb::SteelSeriesBatteryKind::Rival3Or650);
+
+    auto r650c = slb::findSteelSeriesWirelessProfile(0x172B);
+    CHECK(r650c.has_value());
+    CHECK(r650c->endpoint == 0);
+    CHECK(r650c->isWired);
+    CHECK(r650c->kind == slb::SteelSeriesBatteryKind::Rival3Or650);
+
+    auto aerox3 = slb::findSteelSeriesWirelessProfile(0x1838);
+    CHECK(aerox3.has_value() && aerox3->endpoint == 3 && aerox3->command == 0xD2);
+    auto aerox3g2 = slb::findSteelSeriesWirelessProfile(0x1890);
+    CHECK(aerox3g2.has_value() && aerox3g2->kind == slb::SteelSeriesBatteryKind::DirectAerox);
+    auto rival3 = slb::findSteelSeriesWirelessProfile(0x1830);
+    CHECK(rival3.has_value() && rival3->endpoint == 3);
+    auto rivalPro = slb::findSteelSeriesWirelessProfile(0x1880);
+    CHECK(rivalPro.has_value() && rivalPro->endpoint == 2 && rivalPro->command == 0x92);
+
+    CHECK(slb::isKnownNonWirelessSteelSeriesPid(0x1824));
+    CHECK(slb::isKnownNonWirelessSteelSeriesPid(0x1724));
+    CHECK(!slb::isKnownNonWirelessSteelSeriesPid(0x1726));
+
+    CHECK(slb::isNonMouseSteelSeriesName(L"SteelSeries Apex Pro TKL"));
+    CHECK(slb::isNonMouseSteelSeriesName(L"Arctis Nova Pro Wireless"));
+    CHECK(!slb::isNonMouseSteelSeriesName(L"SteelSeries Rival 650 Wireless"));
+
+    CHECK(slb::parseWindowsHidInterfaceNumber(L"\\\\?\\hid#vid_1038&pid_1838&mi_03&col01#...") == 3);
+    CHECK(slb::parseWindowsHidInterfaceNumber(L"\\\\?\\hid#vid_1038&pid_1726&MI_00#...") == 0);
+    CHECK(slb::parseWindowsHidInterfaceNumber(L"\\\\?\\hid#vid_1038&pid_1726&col02#...") == -1);
+}
+
+void testSteelSeriesDecoders() {
+    // Rival 650 live-captured format: [0x5A, 0x00, 0x00, ...] -> 90% discharging
+    const std::array<uint8_t, 8> r650Raw = {0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    auto d1 = slb::decodeSteelSeriesRival3Or650(r650Raw);
+    CHECK(d1.has_value() && d1->percentage == 90 && !d1->charging);
+
+    // Windows Report-ID prefixed Rival 650 / Rival 3: [0x00, 90, 0x00, 1] -> 90% charging
+    const std::array<uint8_t, 4> r650Win = {0x00, 90, 0x00, 0x01};
+    auto d2 = slb::decodeSteelSeriesRival3Or650(r650Win);
+    CHECK(d2.has_value() && d2->percentage == 90 && d2->charging);
+
+    // Echo format with report ID prefix: [0x00, 0xAA, 0x01, 80, 1]
+    const std::array<uint8_t, 5> rEcho = {0x00, 0xAA, 0x01, 80, 1};
+    auto d3 = slb::decodeSteelSeriesRival3Or650(rEcho);
+    CHECK(d3.has_value() && d3->percentage == 80 && d3->charging);
+
+    // Zero & out-of-range rejection
+    const std::array<uint8_t, 4> rZero = {0, 0, 0, 0};
+    const std::array<uint8_t, 4> rInvalid = {0x00, 150, 0, 0};
+    CHECK(!slb::decodeSteelSeriesRival3Or650(rZero).has_value());
+    CHECK(!slb::decodeSteelSeriesRival3Or650(rInvalid).has_value());
+
+    // Aerox / Prime 1..21 scale
+    const std::array<uint8_t, 3> aerox85 = {0x00, 0xD2, 18};
+    CHECK(slb::isMatchingSteelSeriesCommandResponse(aerox85, 0xD2));
+    auto a1 = slb::decodeSteelSeriesAeroxPrime(aerox85);
+    CHECK(a1.has_value() && a1->percentage == 85 && !a1->charging);
+
+    const std::array<uint8_t, 3> aerox50c = {0x00, 0x92, 11 | 0x80};
+    auto a2 = slb::decodeSteelSeriesAeroxPrime(aerox50c);
+    CHECK(a2.has_value() && a2->percentage == 50 && a2->charging);
+
+    // Interleaved 0x61 RGB heartbeat packet & 0xFF keyboard NACK rejection
+    const std::array<uint8_t, 4> rgbPkt = {0x61, 0x00, 0x31, 0x31};
+    const std::array<uint8_t, 4> nackPkt = {0x00, 0xD2, 0xFF, 0x00};
+    CHECK(!slb::isMatchingSteelSeriesCommandResponse(rgbPkt, 0xD2));
+    CHECK(!slb::decodeSteelSeriesAeroxPrime(nackPkt).has_value());
+    CHECK(!slb::decodeSteelSeriesDirectAerox(nackPkt).has_value());
+
+    // DirectAerox (Rival Pro / Aerox 3 Gen 2)
+    const std::array<uint8_t, 6> rivalProWin = {0x00, 0x92, 0x00, 29, 0x01, 100};
+    auto dp = slb::decodeSteelSeriesDirectAerox(rivalProWin);
+    CHECK(dp.has_value() && dp->percentage == 29 && !dp->charging);
+}
+
 }  // namespace
 
 int main() {
@@ -301,6 +382,8 @@ int main() {
     testBatteryVoltage0x1001();
     testConfigRoundTripAndClamping();
     testTaskbarDockGeometry();
+    testSteelSeriesProfilesAndFiltering();
+    testSteelSeriesDecoders();
     if (gFailures > 0) {
         std::cerr << gFailures << " check(s) failed.\n";
         return 1;

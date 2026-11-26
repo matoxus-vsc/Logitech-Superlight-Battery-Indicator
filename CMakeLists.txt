@@ -15,6 +15,8 @@ add_executable(SuperlightBattery WIN32
     src/autostart.cpp
     src/hidpp_protocol.cpp
     src/hid_device.cpp
+    src/steelseries_protocol.cpp
+    src/steelseries_device.cpp
     src/battery_poller.cpp
     src/renderer.cpp
     src/taskbar_dock.cpp
@@ -55,6 +57,7 @@ target_link_libraries(SuperlightBattery PRIVATE
 add_executable(hidpp_tests
     tests/hidpp_tests.cpp
     src/hidpp_protocol.cpp
+    src/steelseries_protocol.cpp
     src/config.cpp
     src/taskbar_dock.cpp
 )

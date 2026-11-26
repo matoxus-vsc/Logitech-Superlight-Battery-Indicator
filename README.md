@@ -1,6 +1,6 @@
 # Logitech Superlight Battery Indicator
 
-A tiny, open-source native **C++20 (Win32 API + Direct2D)** battery indicator widget for **Logitech PRO X Superlight** wireless mice on Windows 10/11 — **no Logitech G HUB required**, zero input lag for CS2 / competitive FPS, and native Windows taskbar docking.
+A tiny, open-source native **C++20 (Win32 API + Direct2D)** battery indicator widget for **Logitech PRO X Superlight / Superstrike** and **SteelSeries wireless** mice on Windows 10/11 — **no Logitech G HUB or SteelSeries GG required**, zero input lag for CS2 / competitive FPS, and native Windows taskbar docking.
 
 ![Taskbar Widget Preview](docs/preview.png)
 
@@ -9,9 +9,9 @@ A tiny, open-source native **C++20 (Win32 API + Direct2D)** battery indicator wi
 ## Features
 
 - **Native Windows Binary:** Single static-linked `.exe` (`< 1.5 MB` on disk, `< 12 MB` working set RAM), linking strictly against built-in Windows system libraries (`hid.lib`, `setupapi.lib`, `d2d1.lib`, `dwrite.lib`, `shell32.lib`, `advapi32.lib`). No Electron, WebView2, Qt, or VC++ redistributable runtime dependencies.
-- **Full Logitech Superlight Series Support (Wireless & Wired):**
-  - **Supported models:** PRO X Superlight (Gen 1), PRO X Superlight 2, PRO X Superlight 2 DEX, and future/variant Superlight LIGHTSPEED receivers or direct USB charging cables.
-  - **Dynamic PID-agnostic HID++ 2.0 discovery:** Scans all `VID = 0x046D` vendor HID++ interfaces (`UsagePage 0xFF00` / `0xFF43`) and automatically probes both wired USB (`0xFF` / `0x00`) and LIGHTSPEED receiver indices (`0x01`–`0x06`), negotiating `0x1004` (`UnifiedBattery`), `0x1000` (`BatteryLevelStatus`), or `0x1001` (`BatteryVoltage`).
+- **Full Logitech Superlight & SteelSeries Wireless Support (2.4 GHz & Wired Charging):**
+  - **Logitech models:** PRO X Superlight (Gen 1), PRO X Superlight 2, PRO X Superlight 2 DEX, PRO X2 Superstrike, and variant LIGHTSPEED receivers or USB charging cables via dynamic PID-agnostic HID++ 2.0 discovery (`VID = 0x046D`, `0x1004` / `0x1000` / `0x1001`).
+  - **SteelSeries models:** Rival 650 Wireless (`0x1726` / `0x172B`), Rival 3 Wireless (Gen 1 & Gen 2), Aerox 3 / Aerox 3 Gen 2 / Aerox 5 / Aerox 9 Wireless, Prime / Prime Mini Wireless, Rival Pro, and generic fallback for unlisted SteelSeries wireless mice (`VID = 0x1038`, vendor HID collections only).
   - **Sleep-resilient:** Retains the last known percentage (dimmed) when the mouse enters deep sleep instead of dropping to `0%` or spamming HID writes, and switches smoothly when plugging/unplugging the USB charging cable.
 - **Zero-Input-Lag Architecture (CS2 / Competitive Gaming Ready):**
   - **Zero global hooks:** No `SetWindowsHookEx` mouse/keyboard hooks and no DLL injection into games or `explorer.exe`.
@@ -99,7 +99,7 @@ Because open-source binaries are not EV code-signed, Windows SmartScreen may pro
 
 ## Wersja polska (Szybki start)
 
-Lekki wskaźnik baterii dla myszek **Logitech PRO X Superlight / Superlight 2 / Superlight 2 DEX** (bezprzewodowo przez odbiornik **LIGHTSPEED** oraz podczas ładowania po **kablu USB**) niewymagający **Logitech G HUB**.
+Lekki wskaźnik baterii dla myszek **Logitech PRO X Superlight / Superlight 2 / Superlight 2 DEX / Superstrike** oraz bezprzewodowych myszek **SteelSeries** (**Rival 650 Wireless**, **Rival 3 Wireless**, **Aerox 3/5/9 Wireless**, **Prime Wireless**) — zarówno bezprzewodowo po 2.4 GHz, jak i podczas ładowania po **kablu USB**, bez konieczności instalowania **Logitech G HUB** ani **SteelSeries GG**.
 
 - **Zero input laga w CS2:** brak globalnych hooków (`SetWindowsHookEx`), brak wstrzykiwania DLL, `0%` zużycia CPU w spoczynku oraz automatyczne ukrywanie widżetu na pasku zadań podczas gier pełnoekranowych.
 - **Menu zasobnika systemowego (PPM na ikonę lub widżet):**
