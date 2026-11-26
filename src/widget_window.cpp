@@ -11,7 +11,7 @@ namespace slb {
 
 namespace {
 
-constexpr wchar_t kWindowClassName[] = L"LogitechSuperlightBatteryWidgetWnd";
+constexpr wchar_t kWindowClassName[] = L"WirelessMouseBatteryWidgetWnd";
 
 constexpr UINT WM_APP_FOREGROUND_CHANGED = WM_APP + 103;
 constexpr UINT WM_APP_TASKBAR_MOVED = WM_APP + 104;
@@ -98,7 +98,7 @@ bool WidgetWindow::create(HINSTANCE hInstance, int /*nCmdShow*/) {
     hwnd_ = CreateWindowExW(
         exStyle,
         kWindowClassName,
-        L"Superlight Battery",
+        L"Wireless Mouse Battery Indicator",
         WS_POPUP,
         0,
         0,

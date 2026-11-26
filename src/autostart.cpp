@@ -10,7 +10,8 @@ namespace slb {
 namespace {
 
 constexpr wchar_t kRunKeyPath[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-constexpr wchar_t kRunValueName[] = L"LogitechSuperlightBatteryIndicator";
+constexpr wchar_t kRunValueName[] = L"WirelessMouseBatteryIndicator";
+constexpr wchar_t kLegacyRunValueName[] = L"LogitechSuperlightBatteryIndicator";
 
 std::wstring getCurrentExePath() {
     std::vector<wchar_t> buf(MAX_PATH, L'\0');
@@ -26,6 +27,14 @@ std::wstring getCurrentExePath() {
     }
 }
 
+bool hasRunValue(HKEY key, const wchar_t* valueName) {
+    DWORD type = 0;
+    DWORD sizeBytes = 0;
+    const LONG res = RegQueryValueExW(key, valueName, nullptr, &type, nullptr, &sizeBytes);
+    return res == ERROR_SUCCESS && (type == REG_SZ || type == REG_EXPAND_SZ) &&
+           sizeBytes > sizeof(wchar_t);
+}
+
 }  // namespace
 
 bool isAutostartEnabled() {
@@ -34,13 +43,9 @@ bool isAutostartEnabled() {
         return false;
     }
 
-    DWORD type = 0;
-    DWORD sizeBytes = 0;
-    const LONG res = RegQueryValueExW(key, kRunValueName, nullptr, &type, nullptr, &sizeBytes);
+    const bool enabled = hasRunValue(key, kRunValueName) || hasRunValue(key, kLegacyRunValueName);
     RegCloseKey(key);
-
-    return res == ERROR_SUCCESS && (type == REG_SZ || type == REG_EXPAND_SZ) &&
-           sizeBytes > sizeof(wchar_t);
+    return enabled;
 }
 
 bool setAutostartEnabled(bool enable) {
@@ -63,10 +68,15 @@ bool setAutostartEnabled(bool enable) {
         const DWORD byteLen = static_cast<DWORD>((quoted.size() + 1) * sizeof(wchar_t));
         opRes = RegSetValueExW(key, kRunValueName, 0, REG_SZ,
                                reinterpret_cast<const BYTE*>(quoted.c_str()), byteLen);
+        RegDeleteValueW(key, kLegacyRunValueName);
     } else {
         opRes = RegDeleteValueW(key, kRunValueName);
         if (opRes == ERROR_FILE_NOT_FOUND) {
             opRes = ERROR_SUCCESS;
+        }
+        const LONG legacyDel = RegDeleteValueW(key, kLegacyRunValueName);
+        if (legacyDel != ERROR_SUCCESS && legacyDel != ERROR_FILE_NOT_FOUND) {
+            opRes = legacyDel;
         }
     }
 

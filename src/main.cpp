@@ -81,7 +81,7 @@ void writeProbeText(const std::wstring& text) {
         WriteConsoleW(consoleOut, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
     }
     if (allocated) {
-        MessageBoxW(nullptr, text.c_str(), L"Superlight HID++ Probe", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(nullptr, text.c_str(), L"Wireless Mouse HID Probe", MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -105,8 +105,8 @@ int WINAPI wWinMain(
     }
 
     const wchar_t* mutexName = cli.mock
-                                   ? L"Local\\LogitechSuperlightBatteryIndicator_Mock_Mutex"
-                                   : L"Local\\LogitechSuperlightBatteryIndicator_Mutex";
+                                   ? L"Local\\WirelessMouseBatteryIndicator_Mock_Mutex"
+                                   : L"Local\\WirelessMouseBatteryIndicator_Mutex";
     HANDLE instanceMutex = CreateMutexW(nullptr, FALSE, mutexName);
     if (instanceMutex != nullptr && GetLastError() == ERROR_ALREADY_EXISTS) {
         CloseHandle(instanceMutex);

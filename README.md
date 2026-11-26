@@ -1,6 +1,6 @@
-# Logitech Superlight & SteelSeries Battery Indicator
+# Wireless Mouse Battery Indicator
 
-A tiny, open-source native **C++20 (Win32 API + Direct2D)** battery indicator widget for **Logitech PRO X Superlight / Superstrike** and **SteelSeries wireless** mice on Windows 10/11 — **no Logitech G HUB or SteelSeries GG required**, zero input lag for CS2 / competitive FPS, and native Windows taskbar docking.
+A tiny, open-source native **C++20 (Win32 API + Direct2D)** taskbar battery indicator widget for **Logitech** and **SteelSeries** wireless gaming mice on Windows 10/11 — **no Logitech G HUB or SteelSeries GG required**, zero input lag for CS2 / competitive FPS, and native Windows taskbar docking.
 
 ![Taskbar Widget Preview](docs/preview.png)
 
@@ -8,7 +8,7 @@ A tiny, open-source native **C++20 (Win32 API + Direct2D)** battery indicator wi
 
 ## Features
 
-- **Native Windows Binary:** Single static-linked `.exe` (`< 1.5 MB` on disk, `< 12 MB` working set RAM), linking strictly against built-in Windows system libraries (`hid.lib`, `setupapi.lib`, `d2d1.lib`, `dwrite.lib`, `shell32.lib`, `advapi32.lib`). No Electron, WebView2, Qt, or VC++ redistributable runtime dependencies.
+- **Native Windows Binary:** Single portable static-linked `.exe` (`~430 KB` on disk, `< 10 MB` working set RAM), linking strictly against built-in Windows system libraries (`hid.lib`, `setupapi.lib`, `d2d1.lib`, `dwrite.lib`, `shell32.lib`, `advapi32.lib`). No Electron, WebView2, Qt, or VC++ redistributable runtime dependencies.
 - **Dual-Vendor Wireless & Wired Charging Support:**
   - **Logitech HID++ 2.0 (`VID = 0x046D`):** Dynamic PID-agnostic discovery across `0x1004` (`UnifiedBattery`), `0x1000` (`BatteryLevelStatus`), and `0x1001` (`BatteryVoltage`), both over LIGHTSPEED receivers and USB charging cables.
   - **SteelSeries Wireless HID (`VID = 0x1038`):** Direct vendor-collection (`UsagePage >= 0xFF00`) battery & charging queries supporting Rival 650, Rival 3, Aerox 3/5/9, Prime, and Rival Pro (plus generic fallback for unlisted SteelSeries wireless mice).
@@ -29,6 +29,15 @@ A tiny, open-source native **C++20 (Win32 API + Direct2D)** battery indicator wi
 | :--- | :--- | :--- |
 | **Logitech** | PRO X Superlight (Gen 1), PRO X Superlight 2, PRO X Superlight 2 DEX, PRO X2 Superstrike, and other HID++ 2.0 mice (dynamic PID discovery) | LIGHTSPEED 2.4 GHz & USB wired charging |
 | **SteelSeries** | Rival 650 Wireless (`0x1726` / `0x172B`), Rival 3 Wireless (Gen 1 & Gen 2), Aerox 3 / Aerox 3 Gen 2 / Aerox 5 / Aerox 9 Wireless (+ special editions), Prime / Prime Mini Wireless, Rival Pro, plus generic wireless fallback | 2.4 GHz dongle & USB wired charging |
+
+---
+
+## Installation (Recommended)
+
+1. Download **`MouseBattery.exe`** from the latest [GitHub Releases](../../releases/latest) page.
+2. Place `MouseBattery.exe` in any folder (e.g. `C:\Tools\MouseBattery\MouseBattery.exe`) — no installer or extra DLLs needed.
+3. Run `MouseBattery.exe`. The battery indicator appears on your Windows taskbar next to the system tray.
+4. *(Optional)* Right-click the widget or system tray icon and enable **Start with Windows** (*Uruchamiaj z Windows*).
 
 ---
 
@@ -54,7 +63,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Output binary: `build/SuperlightBattery.exe` (or `build/Release/SuperlightBattery.exe`).
+Output binary: `build/MouseBattery.exe` (or `build/Release/MouseBattery.exe`).
 
 ---
 
@@ -62,25 +71,25 @@ Output binary: `build/SuperlightBattery.exe` (or `build/Release/SuperlightBatter
 
 - **Default run (docked on Windows taskbar):**
   ```powershell
-  .\SuperlightBattery.exe
+  .\MouseBattery.exe
   ```
 - **UI preview without hardware (`--mock`):** Cycles every 4s through `87%` (normal), `64% + green bolt` (charging), and `12%` (low-battery alert):
   ```powershell
-  .\SuperlightBattery.exe --mock
+  .\MouseBattery.exe --mock
   ```
 - **Floating pill / 4-device preview:**
   ```powershell
-  .\SuperlightBattery.exe --mock --floating
-  .\SuperlightBattery.exe --mock --multi
+  .\MouseBattery.exe --mock --floating
+  .\MouseBattery.exe --mock --multi
   ```
 - **Hardware diagnostic probe (`--probe`):** Scans both Logitech HID++ (`VID=0x046D`) and SteelSeries vendor HID (`VID=0x1038`) interfaces, printing protocol versions, device names, and live battery readings:
   ```powershell
-  .\SuperlightBattery.exe --probe
+  .\MouseBattery.exe --probe
   ```
 
 ### Configuration (`config.json`)
 
-See [`config.example.json`](config.example.json). `config.json` is generated automatically next to `SuperlightBattery.exe`:
+See [`config.example.json`](config.example.json). `config.json` is generated automatically next to `MouseBattery.exe`:
 
 | Key | Default | Description |
 | :--- | :--- | :--- |
@@ -99,22 +108,26 @@ See [`config.example.json`](config.example.json). `config.json` is generated aut
 Prebuilt binaries published via GitHub Releases are compiled directly on `windows-latest` from this repository and ship with `SHA256SUMS.txt`:
 
 ```powershell
-Get-FileHash .\SuperlightBattery.exe -Algorithm SHA256
+Get-FileHash .\MouseBattery.exe -Algorithm SHA256
 ```
 
 Because open-source binaries are not EV code-signed, Windows SmartScreen may prompt on first run (*More info -> Run anyway*), or you can build locally from source in seconds.
 
 ---
 
-## Wersja polska (Szybki start)
+## Wersja polska (Instalacja i szybki start)
 
-Lekki, natywny wskaźnik baterii na pasek zadań Windows 10/11 dla myszek **Logitech** oraz **SteelSeries** — bez konieczności instalowania **Logitech G HUB** ani **SteelSeries GG**.
+Lekki, natywny wskaźnik baterii na pasek zadań Windows 10/11 dla bezprzewodowych myszek **Logitech** oraz **SteelSeries** — bez konieczności instalowania **Logitech G HUB** ani **SteelSeries GG**.
 
+- **Instalacja (gotowy plik `.exe`):**
+  1. Pobierz **`MouseBattery.exe`** z zakładki [Releases](../../releases/latest) i wrzuć do dowolnego folderu (program jest w 100% przenośny, nie wymaga instalatora ani dodatkowych bibliotek).
+  2. Uruchom `MouseBattery.exe` — widżet pojawi się automatycznie na pasku zadań obok zasobnika.
+  3. Kliknij PPM na ikonę w zasobniku i zaznacz **Uruchamiaj z Windows**, aby startował razem z systemem.
 - **Obsługiwane myszki (2.4 GHz + ładowanie po kablu USB):**
   - **Logitech:** PRO X Superlight (Gen 1), PRO X Superlight 2, PRO X Superlight 2 DEX, PRO X2 Superstrike oraz pozostałe myszki HID++ 2.0 (dynamiczne wykrywanie po `VID=0x046D`).
   - **SteelSeries:** Rival 650 Wireless, Rival 3 Wireless (Gen 1 i Gen 2), Aerox 3 / Aerox 3 Gen 2 / Aerox 5 / Aerox 9 Wireless, Prime / Prime Mini Wireless, Rival Pro oraz ogólny tryb dla niewymienionych modeli bezprzewodowych SteelSeries.
 - **Zero input laga w CS2:** brak globalnych hooków (`SetWindowsHookEx`), brak wstrzykiwania DLL, `0%` zużycia CPU w spoczynku oraz automatyczne ukrywanie widżetu na pasku zadań podczas gier pełnoekranowych.
-- **Dodatkowe funkcje:** automatyczny język menu PL/EN, ciche powiadomienie z zasobnika przy niskiej baterii (`low_battery_notify`, wstrzymywane w trakcie gry) oraz diagnostyka sprzętu komendą `.\SuperlightBattery.exe --probe`.
+- **Dodatkowe funkcje:** automatyczny język menu PL/EN, ciche powiadomienie z zasobnika przy niskiej baterii (`low_battery_notify`, wstrzymywane w trakcie gry) oraz diagnostyka sprzętu komendą `.\MouseBattery.exe --probe`.
 - **Menu zasobnika systemowego (PPM na ikonę lub widżet):**
   - **Zadokuj na pasku zadań** — domyślnie osadza wskaźnik obok zegara/zasobnika (`TrayNotifyWnd`)
   - **Tryb pływający** — przełącza na kompaktową ciemną pigułkę na pulpicie

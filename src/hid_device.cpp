@@ -108,6 +108,7 @@ bool containsIgnoreCase(std::wstring_view haystack, std::wstring_view needle) {
 
 bool isSuperlightPreferredName(std::wstring_view name) {
     return containsIgnoreCase(name, L"superlight") ||
+           containsIgnoreCase(name, L"superstrike") ||
            containsIgnoreCase(name, L"pro x");
 }
 
@@ -601,7 +602,7 @@ std::optional<SuperlightHidClient::CachedDevice> SuperlightHidClient::discoverOn
     dev.isReceiver = isReceiver;
     dev.deviceIndex = devIdx;
     dev.connection = isReceiver ? ConnectionType::LightspeedWireless : ConnectionType::UsbWired;
-    dev.deviceName = iface.productString.empty() ? L"Logitech Superlight" : iface.productString;
+    dev.deviceName = iface.productString.empty() ? L"Logitech Wireless Mouse" : iface.productString;
 
     uint8_t nameFeatIdx = 0;
     if (queryFeatureIndexDirect(
@@ -780,7 +781,7 @@ std::vector<SuperlightHidClient::CachedDevice> SuperlightHidClient::probeReceive
         stub.deviceIndex = kDevIdxReceiverSlot1;
         stub.category = DeviceCategory::Mouse;
         stub.connection = ConnectionType::LightspeedWireless;
-        stub.deviceName = iface.productString.empty() ? L"Logitech Superlight" : iface.productString;
+        stub.deviceName = iface.productString.empty() ? L"Logitech Wireless Mouse" : iface.productString;
         stub.lastState.present = true;
         stub.lastState.sleeping = true;
         stub.lastState.percentage = -1;
@@ -1117,7 +1118,7 @@ AppSnapshot SuperlightHidClient::poll(bool multiDeviceMode, bool topologyChanged
 }
 
 void runHardwareProbe(std::wostream& out) {
-    out << L"=== Logitech Superlight HID++ Hardware Probe ===\n";
+    out << L"=== Logitech HID++ Hardware Probe ===\n";
     const auto interfaces = enumerateLogitechHidppInterfaces();
     if (interfaces.empty()) {
         out << L"No Logitech HID++ interfaces (VID=0x046D, UsagePage 0xFF00/0xFF43) found.\n";

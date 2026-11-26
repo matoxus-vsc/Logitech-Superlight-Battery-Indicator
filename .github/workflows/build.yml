@@ -31,8 +31,8 @@ jobs:
       - name: Verify Binary Footprint (< 1.5 MB)
         shell: pwsh
         run: |
-          $exe = Get-Item "build/Release/SuperlightBattery.exe"
-          Write-Host "SuperlightBattery.exe size: $($exe.Length) bytes ($([math]::Round($exe.Length / 1KB, 1)) KB)"
+          $exe = Get-Item "build/Release/MouseBattery.exe"
+          Write-Host "MouseBattery.exe size: $($exe.Length) bytes ($([math]::Round($exe.Length / 1KB, 1)) KB)"
           if ($exe.Length -ge 1572864) {
             throw "Executable exceeds 1.5 MB target footprint!"
           }
@@ -41,11 +41,11 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item "build/Release/SuperlightBattery.exe" "dist/"
+          Copy-Item "build/Release/MouseBattery.exe" "dist/"
           Copy-Item "config.example.json" "dist/"
           Copy-Item "LICENSE" "dist/"
           Push-Location dist
-          Get-FileHash -Algorithm SHA256 "SuperlightBattery.exe", "config.example.json" |
+          Get-FileHash -Algorithm SHA256 "MouseBattery.exe", "config.example.json" |
             ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([System.IO.Path]::GetFileName($_.Path))" } |
             Set-Content -Path "SHA256SUMS.txt" -Encoding ascii
           Get-Content "SHA256SUMS.txt"
@@ -54,7 +54,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SuperlightBattery-win64
+          name: MouseBattery-win64
           path: dist/
 
       - name: Publish GitHub Release on Tag
@@ -62,7 +62,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/SuperlightBattery.exe
+            dist/MouseBattery.exe
             dist/config.example.json
             dist/LICENSE
             dist/SHA256SUMS.txt

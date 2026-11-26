@@ -70,7 +70,7 @@ AppSnapshot BatteryPoller::buildMockSnapshot(int phase, bool multiDeviceMode) co
 
     snap.primaryMouse.present = true;
     snap.primaryMouse.category = DeviceCategory::Mouse;
-    snap.primaryMouse.deviceName = L"PRO X Superlight (Mock)";
+    snap.primaryMouse.deviceName = L"Wireless Mouse (Mock)";
     snap.primaryMouse.featureUsed = kFeatureUnifiedBattery;
 
     switch (phase % 3) {
