@@ -41,6 +41,7 @@ public:
     bool create(HWND hwnd, const AppSnapshot& snapshot, const AppConfig& config);
     void destroy();
     void recreate();
+    bool isAdded() const { return added_; }
     void update(const AppSnapshot& snapshot, const AppConfig& config);
     void showLowBatteryNotification(const DeviceBatteryState& mouse);
 

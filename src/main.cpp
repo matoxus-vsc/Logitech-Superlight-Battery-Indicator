@@ -1,3 +1,4 @@
+#include "autostart.hpp"
 #include "config.hpp"
 #include "hid_device.hpp"
 #include "steelseries_device.hpp"
@@ -111,6 +112,10 @@ int WINAPI wWinMain(
     if (instanceMutex != nullptr && GetLastError() == ERROR_ALREADY_EXISTS) {
         CloseHandle(instanceMutex);
         return 0;
+    }
+
+    if (!cli.mock && !cli.probe) {
+        slb::repairStaleAutostartIfEnabled();
     }
 
     const std::filesystem::path configPath = slb::getConfigPath();

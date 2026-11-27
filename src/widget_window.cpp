@@ -226,6 +226,10 @@ void WidgetWindow::syncTaskbarState(bool forceReposition) {
         return;
     }
 
+    if (!trayIcon_.isAdded()) {
+        trayIcon_.recreate();
+    }
+
     const TaskbarLayout layout = queryTaskbarLayout();
     const bool themeOrMetricsChanged =
         (layout.valid != lastTaskbarLayout_.valid) ||
@@ -234,6 +238,21 @@ void WidgetWindow::syncTaskbarState(bool forceReposition) {
         (layout.isLightTheme != lastTaskbarLayout_.isLightTheme);
 
     lastTaskbarLayout_ = layout;
+
+    if (layout.valid && layout.taskbarHwnd != nullptr && taskbarLocHook_ == nullptr) {
+        DWORD explorerPid = 0;
+        GetWindowThreadProcessId(layout.taskbarHwnd, &explorerPid);
+        if (explorerPid != 0) {
+            taskbarLocHook_ = SetWinEventHook(
+                EVENT_OBJECT_LOCATIONCHANGE,
+                EVENT_OBJECT_LOCATIONCHANGE,
+                nullptr,
+                &WidgetWindow::winEventProc,
+                explorerPid,
+                0,
+                WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
+        }
+    }
 
     if (!layout.valid || userHidden_ || layout.autoHiddenCollapsed ||
         isFullscreenAppActiveOnMonitor(layout.monitor, hwnd_)) {
@@ -590,6 +609,9 @@ LRESULT WidgetWindow::wndProc(UINT msg, WPARAM wParam, LPARAM lParam) {
                 syncTaskbarState(false);
             } else {
                 renderNow();
+            }
+            if (!trayIcon_.isAdded()) {
+                trayIcon_.recreate();
             }
             trayIcon_.update(currentSnapshot_, effectiveConfig());
             maybeNotifyLowBattery();

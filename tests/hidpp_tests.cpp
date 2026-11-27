@@ -1,3 +1,4 @@
+#include "../src/autostart.hpp"
 #include "../src/config.hpp"
 #include "../src/hidpp_protocol.hpp"
 #include "../src/steelseries_protocol.hpp"
@@ -372,6 +373,40 @@ void testSteelSeriesDecoders() {
     CHECK(dp.has_value() && dp->percentage == 29 && !dp->charging);
 }
 
+void testAutostartHelpers() {
+    CHECK(slb::extractExePathFromRunCommand(L"\"C:\\Apps\\Mouse Battery\\MouseBattery.exe\"") ==
+          L"C:\\Apps\\Mouse Battery\\MouseBattery.exe");
+    CHECK(slb::extractExePathFromRunCommand(
+              L"  \"C:\\Apps\\Mouse Battery\\MouseBattery.exe\" --floating  ") ==
+          L"C:\\Apps\\Mouse Battery\\MouseBattery.exe");
+    CHECK(slb::extractExePathFromRunCommand(
+              L"C:\\Program Files\\Mouse Battery\\MouseBattery.exe --arg") ==
+          L"C:\\Program Files\\Mouse Battery\\MouseBattery.exe");
+    CHECK(slb::extractExePathFromRunCommand(L"D:\\Tools\\MouseBattery.exe") ==
+          L"D:\\Tools\\MouseBattery.exe");
+    CHECK(slb::extractExePathFromRunCommand(L"   \t  ").empty());
+
+    CHECK(slb::autostartPathsMatch(
+        L"C:\\Apps\\MouseBattery.exe", L"c:/apps/MouseBattery.exe"));
+    CHECK(slb::autostartPathsMatch(
+        L"\\\\?\\C:\\Apps\\MouseBattery.exe\\", L"C:\\Apps\\MouseBattery.exe"));
+    CHECK(!slb::autostartPathsMatch(
+        L"C:\\Apps\\SuperlightBattery.exe", L"C:\\Apps\\MouseBattery.exe"));
+
+    const std::array<uint8_t, 12> enabled02 = {0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    const std::array<uint8_t, 12> enabled06 = {0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    const std::array<uint8_t, 12> disabled03 = {0x03, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8};
+    const std::array<uint8_t, 12> disabled01 = {0x01, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8};
+    const std::array<uint8_t, 12> disabled07 = {0x07, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+    CHECK(slb::isStartupApprovedBlobEnabled({}));
+    CHECK(slb::isStartupApprovedBlobEnabled(enabled02));
+    CHECK(slb::isStartupApprovedBlobEnabled(enabled06));
+    CHECK(!slb::isStartupApprovedBlobEnabled(disabled03));
+    CHECK(!slb::isStartupApprovedBlobEnabled(disabled01));
+    CHECK(!slb::isStartupApprovedBlobEnabled(disabled07));
+}
+
 }  // namespace
 
 int main() {
@@ -384,6 +419,7 @@ int main() {
     testTaskbarDockGeometry();
     testSteelSeriesProfilesAndFiltering();
     testSteelSeriesDecoders();
+    testAutostartHelpers();
     if (gFailures > 0) {
         std::cerr << gFailures << " check(s) failed.\n";
         return 1;

@@ -56,6 +56,7 @@ target_link_libraries(MouseBattery PRIVATE
 
 add_executable(mouse_battery_tests
     tests/hidpp_tests.cpp
+    src/autostart.cpp
     src/hidpp_protocol.cpp
     src/steelseries_protocol.cpp
     src/config.cpp
